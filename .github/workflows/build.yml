@@ -32,8 +32,9 @@ jobs:
     if: github.event_name == 'pull_request_target' && github.event.action != 'closed'
     runs-on: ubuntu-latest
     permissions:
-      contents: write        # only for the preview branch; nothing else is written
-      pull-requests: write   # for the report comment
+      contents: write   # only for the preview branch; nothing else is written
+      issues: write     # the report comments: a pull request's comments are its issue comments
+      pull-requests: write
     env:
       ICON_RANDOM_DIGITS: 6
 

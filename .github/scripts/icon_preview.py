@@ -7,6 +7,7 @@ import re
 import subprocess
 from pathlib import Path
 from typing import Any
+from urllib.error import HTTPError
 from urllib.parse import quote
 from urllib.request import Request, urlopen
 
@@ -188,8 +189,15 @@ def github_request(
     try:
         with urlopen(request, timeout=30) as response:
             response_body = response.read()
+    except HTTPError as error:
+        # The API's own message is the useful part of a refusal, and it is not in the exception.
+        detail = error.read().decode("utf-8", "replace").strip()
+        raise PreviewError(
+            f"GitHub API request failed: {method} {url} -> "
+            f"{error.code} {error.reason}: {detail}"
+        ) from error
     except OSError as error:
-        raise PreviewError(f"GitHub API request failed: {error}") from error
+        raise PreviewError(f"GitHub API request failed: {method} {url} -> {error}") from error
     if not response_body:
         return None
     return json.loads(response_body)
